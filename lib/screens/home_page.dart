@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_api/youtube_api.dart';
 
 import '../global.dart';
@@ -10,7 +11,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool typing = false;
-  static String key = "AIzaSyAuGk27tyB4k_kvUOpzt758Exqyf_8RL6M";
+  static String key = "AIzaSyBRVa7iu7N03OuNEqZKHQGK1au-zbeRwZw";
   String header = "New Song";
 
   YoutubeAPI youtube = YoutubeAPI(key);
@@ -26,10 +27,20 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  time() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+
+    Global.time = pref.getStringList('time') ?? [];
+    Global.count = pref.getInt('count') ?? 0;
+    Global.count--;
+    Global.searchList = pref.getStringList('searchList') ?? [];
+  }
+
   @override
   void initState() {
     super.initState();
     callAPI();
+    time();
   }
 
   @override
@@ -39,7 +50,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.blue,
           title: Row(
             children: const [
               Icon(
@@ -78,6 +89,33 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: 10),
           ],
         ),
+        drawer: Drawer(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 200,
+              color: Colors.lightBlue,
+              child: Text("YouTub", style: TextStyle(fontSize: 20)),
+              alignment: Alignment.center,
+            ),
+            SizedBox(height: 20),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  Navigator.of(context).pushNamed('history');
+                });
+              },
+              child: Container(
+                height: 100,
+                color: Colors.lightBlue,
+                child: Text("HisTory", style: TextStyle(fontSize: 20)),
+                alignment: Alignment.center,
+              ),
+            )
+          ],
+        )),
         body: Column(
           children: [
             Expanded(
