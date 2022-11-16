@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_api/youtube_api.dart';
-
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:viva_1_master_flutter/global.dart';
 import '../global.dart';
 
 class SearchPage extends StatefulWidget {
@@ -14,9 +16,10 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   TextEditingController searchController = TextEditingController();
 
-  static String key = "AIzaSyBvQTmhULz3GsZ8PzcxOPD7ddZ91hRrGPI";
+  static String key = "AIzaSyBRVa7iu7N03OuNEqZKHQGK1au-zbeRwZw";
   YoutubeAPI youtube = YoutubeAPI(key);
   List<YouTubeVideo> videoResult = [];
+  // var fixedLengthList = List(3);
 
   Future<void> callAPI() async {
     videoResult = await youtube.search(
@@ -72,7 +75,10 @@ class _SearchPageState extends State<SearchPage> {
                       on = false;
                       Global.searchList.add(searchController.text);
                       Global.searchList = Global.searchList.toSet().toList();
-
+                      Global.time.add(DateTime.now().toString());
+                      Global.count++;
+                      prefs.setStringList('time', Global.time);
+                      prefs.setInt('count', Global.count);
                       prefs.setStringList("searchList", Global.searchList);
                       callAPI();
                       setState(() {});
@@ -164,6 +170,57 @@ class _SearchPageState extends State<SearchPage> {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+
+//history
+
+
+
+class history extends StatefulWidget {
+  const history({Key? key}) : super(key: key);
+
+  @override
+  State<history> createState() => _historyState();
+}
+
+class _historyState extends State<history> {
+  time() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+
+    Global.time = pref.getStringList('time') ?? [];
+    Global.count = pref.getInt('count') ?? 0;
+    Global.searchList = pref.getStringList('searchList') ?? [];
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    time();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("History"), centerTitle: true),
+      body: ListView.builder(
+        itemCount: Global.searchList.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            style: ListTileStyle.list,
+            leading: CircleAvatar(
+              radius: 25,
+              child: Text("${index}"),
+            ),
+            title: Text("${Global.searchList[index]}"),
+            subtitle: Text("${Global.searchList.length}"),
+            trailing: Text("${Global.time[index].split(".")[0]}"),
+          );
+        },
       ),
     );
   }
